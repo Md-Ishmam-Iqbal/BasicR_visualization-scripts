@@ -1,0 +1,88 @@
+# Install necessary libraries if not already installed
+# install.packages("ggplot2")
+# install.packages("ggrepel")
+# install.packages("BiocManager")
+# BiocManager::install("multtest")
+
+
+# Load necessary libraries
+# library(ggplot2)
+# library(ggrepel)
+# library(multtest)
+
+
+# Load the Golub et al. ALL/AML dataset
+data(golub)
+
+gol.fac <- factor(golub.cl, levels = 0:1, labels = c("ALL", "AML"))
+
+
+# Plot gene expression values using ggplot2
+gene_index <- 1042
+gene_values <- golub[gene_index,]
+
+plot_data <- data.frame(Patients = 1:length(gene_values), Expression = gene_values)
+
+ggplot(plot_data, aes(x = Patients, y = Expression)) +
+  geom_point(color = "lightskyblue") +
+  geom_smooth(method="lm", se=FALSE, color="cornflowerblue", linetype="dashed") +
+  geom_text_repel(aes(label = Expression), vjust = -0.5, color = "white", size = 2.5) +
+  xlab("Patients") +
+  ylab("Expression values") +
+  labs(title = "Plot of gene expression values of CCND3 cyclin D3 gene") + 
+  theme(
+    panel.background = element_rect(fill = "grey2"),
+    panel.grid.major = element_line(color = "lightskyblue1", linetype = "dotted"),
+    panel.grid.minor = element_line(color = "steelblue2", linetype = "dotted"),
+    axis.title.x = element_text(color = "red3", size = 12, face = "bold"),
+    axis.title.y = element_text(color = "red3", size = 12, face = "bold"),
+    plot.title = element_text(color = "royalblue3", size = 14, face = "bold")
+  )
+
+# Publication ready plot
+ggplot(plot_data, aes(x = Patients, y = Expression)) +
+  geom_point(color = "#6BAED6") +
+  geom_smooth(method = "lm", se = FALSE, color = "#2171B5", linetype = "dashed") +
+  geom_text_repel(aes(label = Expression), vjust = -1, color = "gray40", size = 2.5) +
+  xlab("Patients") +
+  ylab("Expression values") +
+  labs(title = "Plot of gene expression values of CCND3 cyclin D3 gene") +
+  theme(
+    panel.background = element_rect(fill = "#F0F0F0"),
+    panel.grid.major = element_line(color = "#D9D9D9", linetype = "dotted"),
+    panel.grid.minor = element_line(color = "#E5E5E5", linetype = "dotted"),
+    axis.title.x = element_text(color = "#333333", size = 12, face = "bold"),
+    axis.title.y = element_text(color = "#333333", size = 12, face = "bold"),
+    plot.title = element_text(color = "#333333", size = 14, face = "bold")
+  )
+
+
+# with labels, axis, legends
+
+ggplot(plot_data, aes(x = Patients, y = Expression, color = gol.fac)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", size = 0.5) +
+  geom_text_repel(aes(label = Expression), vjust = -2, color = "black", size = 2) +
+  xlab("Patients") +
+  ylab("Expression values") +
+  labs(
+    title = "Gene Expression Analysis of CCND3 Cyclin D3 Gene",
+    subtitle = "Comparison of gene expression values between ALL and AML samples",
+    caption = "Data source: Golub et al. ALL/AML dataset"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(color = "#333333", size = 16, face = "bold"),
+    plot.subtitle = element_text(color = "#666666", size = 12),
+    plot.caption = element_text(color = "#666666", size = 10),
+    axis.title.x = element_text(color = "#333333", size = 12, face = "bold"),
+    axis.title.y = element_text(color = "#333333", size = 12, face = "bold"),
+    axis.text = element_text(color = "#666666", size = 10),
+    legend.title = element_text(color = "#333333", size = 12, face = "bold"),
+    legend.text = element_text(color = "#666666", size = 10),
+    legend.position = "top",  # Adjust the legend position
+    legend.background = element_rect(fill = "white"),  # Add a white background to the legend
+    legend.spacing.x = unit(0.5, "cm")  # Adjust horizontal spacing between legend items
+  ) +
+  scale_color_manual(values = c("#6BAED6", "#F8766D"), name = "Sample Type",
+                     labels = c("ALL", "AML"))
