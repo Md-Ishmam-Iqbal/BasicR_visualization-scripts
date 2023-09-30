@@ -3,7 +3,6 @@ library(ggplot2)
 library(ggrepel)
 library(multtest)
 
-
 # Load the Golub et al. ALL/AML dataset
 data(golub)
 

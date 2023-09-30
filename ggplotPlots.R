@@ -39,7 +39,7 @@ basic_dark_plot <- ggplot(plot_data, aes(x = Patients, y = Expression)) +
 ## Basic Scatter plot light
 basic_light_plot <- ggplot(plot_data, aes(x = Patients, y = Expression)) +
   geom_point(color = "#6BAED6") +
-  geom_smooth(method = "lm", se = FALSE, color = "#2171B5", linetype = "dashed") +
+ # geom_smooth(method = "lm", se = FALSE, color = "#2171B5", linetype = "dashed") +
   geom_text_repel(aes(label = Expression), vjust = -1, color = "gray40", size = 2.5) +
   xlab("Patients") +
   ylab("Expression values") +
@@ -164,4 +164,164 @@ ggarrange(withoutStat, withStat, nrow=2, heights=c(1, 1))
 
 
 
-          
+
+
+################################################################################
+
+install.packages("Rtsne")
+install.packages("vegan")
+install.packages("cluster")
+# Load necessary libraries
+library(ggplot2)
+library(Rtsne)
+library(vegan)
+library(cluster)
+
+# Load the Golub et al. ALL/AML dataset
+data(golub)
+
+# Select a subset of the Golub dataset for analysis (e.g., first 100 genes and 30 patients)
+subset_golub <- golub[1:100, 1:30]
+
+# Perform PCA
+pca_result <- prcomp(subset_golub, scale = TRUE)
+
+# Create a data frame for PCA results
+pca_df <- data.frame(PC1 = pca_result$x[, 1], PC2 = pca_result$x[, 2])
+
+# Create PCA scatter plot using ggplot2
+ggplot(pca_df, aes(x = PC1, y = PC2)) +
+  geom_point() +
+  labs(x = "PC1", y = "PC2", title = "PCA Plot")
+
+
+# Perform t-SNE
+tsne_result <- Rtsne(subset_golub)
+
+# Create a data frame for t-SNE results
+tsne_df <- data.frame(Dimension1 = tsne_result$Y[, 1], Dimension2 = tsne_result$Y[, 2])
+
+# Create t-SNE scatter plot using ggplot2
+ggplot(tsne_df, aes(x = Dimension1, y = Dimension2)) +
+  geom_point() +
+  labs(x = "Dimension 1", y = "Dimension 2", title = "t-SNE Plot")
+
+
+# Perform K-means clustering (specify the number of clusters)
+kmeans_result <- kmeans(t(subset_golub), centers = 3)
+
+# Create a data frame for PCA results
+pca_df <- data.frame(PC1 = pca_result$x[, 1], PC2 = pca_result$x[, 2])
+
+# Add cluster assignments to the PCA data frame
+# Extend cluster labels to match the number of rows in pca_df
+cluster_labels <- rep(kmeans_result$cluster, length.out = nrow(pca_df))
+pca_df$Cluster <- as.factor(cluster_labels)
+
+# Create K-means scatter plot using ggplot2
+library(ggplot2)
+ggplot(pca_df, aes(x = PC1, y = PC2, color = Cluster)) +
+  geom_point() +
+  labs(x = "PC1", y = "PC2", title = "K-means Clustering") +
+  scale_color_manual(values = c("red", "blue", "green"))
+
+
+
+
+
+# Perform NMDS
+nmds_result <- metaMDS(subset_golub)
+
+# Create a data frame for NMDS results
+nmds_df <- data.frame(Dimension1 = nmds_result$points[, 1], Dimension2 = nmds_result$points[, 2])
+
+# Create NMDS scatter plot using ggplot2
+ggplot(nmds_df, aes(x = Dimension1, y = Dimension2)) +
+  geom_point(color = "blue") +
+  labs(x = "Dimension 1", y = "Dimension 2", title = "NMDS Plot")
+
+
+
+
+################################################################################
+
+## Prep data
+
+# Sample patients (you can adjust the number of patients)
+set.seed(123)  # For reproducibility
+num_patients <- 5
+
+# Create a vector of patient names (you can replace these with actual patient names)
+patients <- paste("Patient", 1:num_patients)
+
+
+## Chord Diagram
+#install.packages("circlize")
+library(circlize)
+
+# Generate synthetic relationship data (random values between 0 and 1)
+relationship_data <- matrix(runif(num_patients^2), nrow = num_patients, ncol = num_patients)
+rownames(relationship_data) <- colnames(relationship_data) <- patients
+
+# Create the chord diagram
+chordDiagram(relationship_data)
+
+
+## Arc diagram
+#install.packages("ggraph")
+#install.packages("igraph")
+
+library(ggraph)
+library(igraph)
+
+
+# Generate synthetic relationship data (random connections)
+edges <- expand.grid(from = patients, to = patients)
+edges <- edges[edges$from != edges$to, ]
+
+# Create a graph from the synthetic edges
+graph <- graph_from_data_frame(edges)
+
+# Create an arc diagram
+ggraph(graph, layout = "linear") +
+  geom_edge_arc()
+
+
+## Dendogram
+num_genes <- 500  # Adjust this based on the number of genes in your dataset
+selected_genes <- sample(1:nrow(golub), num_genes)
+
+# Create a subset of the Golub dataset with random genes
+subset_data <- golub[selected_genes, ]
+
+# Perform hierarchical clustering
+hierarchical_result <- hclust(dist(t(subset_data)))
+
+# Create dendrogram plot
+plot(hierarchical_result)
+
+
+
+
+num_patients <- 38
+rownames(golub) <- paste("Patient", 1:38)
+
+patients <- rownames(golub)  # Get patient names from the golub dataset
+
+patients
+
+# Create a random assignment of nationalities to patients (for illustration)
+nationalities <- sample(c("USA", "Canada", "UK", "France", "Germany", "Japan"), num_patients, replace = TRUE)
+
+# Create a data frame with patient information (including nationality)
+patient_data <- data.frame(Patient = patients, Nationality = nationalities)
+
+# Create a basic map
+library(ggplot2)
+ggplot(patient_data, aes(x = Nationality, y = 1)) +
+  geom_point() +
+  labs(title = "Geographic Visualization (Fictional)")
+
+
+
+
